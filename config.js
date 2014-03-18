@@ -14,6 +14,10 @@ config.stomp = {
 	'host' : "localhost",
 	'port' :61613,
 	'login' : "guest",
-	'passcode': "guest"
+	'passcode': "guest",
+	'queues' : {
+		'memoryslot': "/pathfinder/events",
+		'route': "/pathfinder/events"
+	}
 }
 module.exports = config;

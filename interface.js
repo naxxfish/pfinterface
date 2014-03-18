@@ -49,7 +49,7 @@ if (stomp && config.stomp.enabled)
 			{
 				stompClient.send(
 				{
-					'destination' : "/pathfinder/events",
+					'destination' : config.stomp.queues['memoryslot'],
 					'body' : JSON.stringify(slot)
 				}, true)
 			});

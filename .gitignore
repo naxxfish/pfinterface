@@ -4,3 +4,5 @@
 /node_modules/express
 /node_modules/nedb
 /node_modules/nodejs-microdb
+/node_modules/stomp
+/node_modules/stompjs
