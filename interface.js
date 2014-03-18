@@ -18,14 +18,54 @@ pfint.on('memorySlot', function (slot) {
 	console.log("New Memeory slot ahoy!")
 	console.log(slot) 
 });
+
+try {
+	var stomp = require('stomp')
+} catch (er)
+{
+	stomp = null
+}
+
+if (stomp && config.stomp.enabled)
+{
+	var stomp_args = {
+		port: config.stomp['port'], //61613,
+		host: config.stomp['host'],
+		debug: false,
+		login: config.stomp['login'],
+		passcode: config.stomp['passcode']
+	}
+	console.log(stomp_args)
+
+	var stompClient = new stomp.Stomp(stomp_args);
+	// Send message on to messagequeue
+	try {
+		stompClient.connect();
+		stompClient.on('receipt', function(receipt) {
+			console.log("RECEIPT: " + receipt);
+		});
+		stompClient.on('connected', function(){
+			pfint.on('memoryslot', function (slot)
+			{
+				stompClient.send(
+				{
+					'destination' : "/pathfinder/events",
+					'body' : JSON.stringify(slot)
+				}, true)
+			});
+		})
+	} catch (err)
+	{
+		console.log("Couldn't connect to STOMP server! :(")
+	} 
+}
+
 pfint.sync({
 		'user' : config.pathfinder.user,
 		'password' : config.pathfinder.password,
 		'host' : config.pathfinder.host,
 		'port' : config.pathfinder.port
 	})
-
-
 
 // API methods coming right up
 var app = express()

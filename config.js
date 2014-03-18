@@ -9,4 +9,11 @@ config.pathfinder = {
 config.http = {
 	'port' : 8080
 }
+config.stomp = {
+	'enabled': true,
+	'host' : "localhost",
+	'port' :61613,
+	'login' : "guest",
+	'passcode': "guest"
+}
 module.exports = config;

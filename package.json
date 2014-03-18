@@ -1,8 +1,12 @@
 {
   "name": "PFInterfaceWeb",
+  "author": "Chris Roberts <chris@naxxfish.eu>",
   "version": "0.0.1",
+  "description": "An interface to PathfinderPC exposing methods as a HTTP REST API.  Also can optionally send messages to a STOMP compatible Message Queue server",
   "dependencies": {
-    "express": "3.x",
-    "stompjs": "~2.3.1"
+    "express": "3.x"
+  },
+  "optionalDependencies": {
+    "stomp": "~0.1.1"
   }
 }
