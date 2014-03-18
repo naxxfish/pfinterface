@@ -7,7 +7,7 @@ For information about PathfinderPC, go to www.pathfinderpc.com
 */
 
 var express = require('express')
-var PFInterface = require('PFInterface')
+var PFInterface = require('pfint')
 
 var config = require('./config')
 
