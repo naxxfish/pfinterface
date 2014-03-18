@@ -1,14 +1,17 @@
-# PFInterface
+## PFInterface
 
-PathfinderPC Server Interface
+by Chris Roberts 
+
+[PathfinderPC](http://www.pathfinderpc.com/) Server HTTP Interface
 
 The purpose of this program is to provide a simple, read-only interface into Pathfinder Server - queryable from HTTP via REST. 
 
 The program will start up and connect to the SAPort default translator (port 9500).  It will keep an internal database with the state of Pathfinder Server being kept in sync.  This database may be queried via a HTTP interface on port 8080
 
-All methods are HTTP GET
 
-## /server
+### Methods
+All methods are HTTP GET
+#### /server
 Provides a list of server information.
 
 	{
@@ -23,7 +26,7 @@ Provides a list of server information.
 		"version": "PathfinderPC Server Pro Version 4.75"
 	}
 
-## /routers
+#### /routers
 Gets a list of all the routers in the system
 	[
 		{
@@ -39,7 +42,7 @@ Gets a list of all the routers in the system
 		}
 	]
 	
-## /translators
+#### /translators
 Gets a list of all the current protocol translators set up on the system
 	[
 		{
@@ -66,10 +69,10 @@ Gets a list of all the current protocol translators set up on the system
 		}
 	]
 	
-## /gpio
+#### /gpio
 Gets a list of all GPIO states ... probably? (Can't test this yet!)
 
-## /sources
+#### /sources
 Gives a list of available sources on all routers in Pathfinder
 
 	[
@@ -96,7 +99,7 @@ Gives a list of available sources on all routers in Pathfinder
 		...
 	]
 	
-## /source/:sourceId
+#### /source/:sourceId
 Gets a source with the provided source ID
 	{
 		"itemType": "source",
@@ -109,7 +112,7 @@ Gets a source with the provided source ID
 		"_id": "Klu1DydarqtHRLBm"
 	}
 	
-## /destinations
+#### /destinations
 Gets a list of all available destinations across all routers on the system
 	[
 		{
@@ -137,7 +140,7 @@ Gets a list of all available destinations across all routers on the system
 		...
 	]
 	
-## /destination/:destinationId
+#### /destination/:destinationId
 Gets a specific destination by ID
 
 	{
@@ -152,7 +155,7 @@ Gets a specific destination by ID
 		"_id": "Soommlo9Tbkei3s7"
 	}
 
-## /routes
+#### /routes
 Gets a list of all routes currently made on the system
 	[
 		{
@@ -175,7 +178,7 @@ Gets a list of all routes currently made on the system
 		}
 		...
 	]
-## /route/source/:sourceId/destination/:destinationId
+#### /route/source/:sourceId/destination/:destinationId
 Gets details about a route between :sourceId and :destinationId
 	{
 		"itemType": "route",
@@ -187,7 +190,7 @@ Gets details about a route between :sourceId and :destinationId
 		"_id": "KmVIV96jiA2Av3Fp"
 	}
 	
-## /route/source/:sourceId
+#### /route/source/:sourceId
 Gets a list of all the routes originating from :sourceId
 	[
 		{
@@ -211,7 +214,7 @@ Gets a list of all the routes originating from :sourceId
 		...
 	]
 	
-## /route/destination/:destinationId
+#### /route/destination/:destinationId
 Gets the current route ending up at :destinationId
 	{
 		"itemType": "route",
@@ -223,7 +226,7 @@ Gets the current route ending up at :destinationId
 		"_id": "9RG7APbKC1XSVdDO"
 	}
 	
-## /memoryslots
+#### /memoryslots
 Gets a list of all the current (set) MemorySlots
 	[
 		{
@@ -242,7 +245,7 @@ Gets a list of all the current (set) MemorySlots
 		}
 	]
 	
-## /memoryslot/:slotName
+#### /memoryslot/:slotName
 Gets the information about memoryslot called :slotName
 	{
 		"itemType": "memoryslot",
