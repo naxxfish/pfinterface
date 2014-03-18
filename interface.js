@@ -14,10 +14,6 @@ var config = require('./config')
 // create the database for pfint to use
 
 var pfint = new PFInterface();
-pfint.on('memorySlot', function (slot) { 
-	console.log("New Memeory slot ahoy!")
-	console.log(slot) 
-});
 
 try {
 	var stomp = require('stomp')
@@ -45,12 +41,24 @@ if (stomp && config.stomp.enabled)
 			console.log("RECEIPT: " + receipt);
 		});
 		stompClient.on('connected', function(){
-			pfint.on('memoryslot', function (slot)
+			pfint.on('memorySlot', function (slot)
 			{
 				stompClient.send(
 				{
 					'destination' : config.stomp.queues['memoryslot'],
 					'body' : JSON.stringify(slot)
+				}, true)
+			});
+			pfint.on('customCommand', function (command)
+			{
+				if (config.debug)
+				{
+					console.log("Custom command: " + command)
+				}
+				stompClient.send(
+				{
+					'destination' : config.stomp.queues['custom'],
+					'body' : command
 				}, true)
 			});
 		})
@@ -59,7 +67,13 @@ if (stomp && config.stomp.enabled)
 		console.log("Couldn't connect to STOMP server! :(")
 	} 
 }
-
+if (config.debug)
+{
+	pfint.on('debug', function (message)
+	{
+		console.log("PFInt: " + JSON.stringify(message))
+	});
+}
 pfint.sync({
 		'user' : config.pathfinder.user,
 		'password' : config.pathfinder.password,

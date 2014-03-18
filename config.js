@@ -1,5 +1,7 @@
 var config = {}
 
+config.debug = true
+
 config.pathfinder = {
 	'user' : 'PFInterface',
 	'password' : 'PFInterface',
@@ -16,8 +18,9 @@ config.stomp = {
 	'login' : "guest",
 	'passcode': "guest",
 	'queues' : {
-		'memoryslot': "/pathfinder/events",
-		'route': "/pathfinder/events"
+		'memoryslot': "/queue/pathfinder.events",
+		'route': "/queue/pathfinder.events",
+		'custom': "/queue/pathfinder.events"
 	}
 }
 module.exports = config;
