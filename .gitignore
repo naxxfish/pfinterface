@@ -1,9 +1,1 @@
-
-/node_modules/stompjs
-/node_modules/.bin
-/node_modules/express
-/node_modules/nedb
-/node_modules/nodejs-microdb
-/node_modules/stomp
-/node_modules/stompjs
-/queue_rx.js
+/node_modules
