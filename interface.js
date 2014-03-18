@@ -7,14 +7,17 @@ For information about PathfinderPC, go to www.pathfinderpc.com
 */
 
 var express = require('express')
-var pfint = require('pfint')
+var PFInterface = require('pfint')
 
 var config = require('./config')
 
 // create the database for pfint to use
 
-
-// EDIT THESE BITS!
+var pfint = new PFInterface();
+pfint.on('memorySlot', function (slot) { 
+	console.log("New Memeory slot ahoy!")
+	console.log(slot) 
+});
 pfint.sync({
 		'user' : config.pathfinder.user,
 		'password' : config.pathfinder.password,
@@ -23,12 +26,12 @@ pfint.sync({
 	})
 
 
+
 // API methods coming right up
 var app = express()
 // what server are we running?
 app.get('/server',function (request, response)
 {
-	console.log(request)
 	pfint.findOne({'itemType' : 'pathfinderserver'}, function(err, server)
 	{
 		response.end(JSON.stringify(server))		
@@ -48,7 +51,6 @@ app.get('/memoryslots',function (request, response)
 {
 	pfint.find({'itemType' : 'memoryslot'}, function(err, slot)
 	{
-		//console.log(slot)
 		response.end(JSON.stringify(slot))		
 	})
 });
@@ -59,7 +61,6 @@ app.get('/memoryslot/:msName',function (request, response)
 {
 	pfint.findOne({'itemType' : 'memoryslot', 'name' : request.param("msName")}, function(err, slot)
 	{
-		//console.log(slot)
 		response.end(JSON.stringify(slot))		
 	})
 });
