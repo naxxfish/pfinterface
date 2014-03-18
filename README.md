@@ -28,6 +28,7 @@ Provides a list of server information.
 
 #### /routers
 Gets a list of all the routers in the system
+
     [
         {
             "itemType": "router",
@@ -102,6 +103,7 @@ Gives a list of available sources on all routers in Pathfinder
     
 #### /source/:sourceId
 Gets a source with the provided source ID
+
     {
         "itemType": "source",
         "id": "1",
@@ -115,6 +117,7 @@ Gets a source with the provided source ID
     
 #### /destinations
 Gets a list of all available destinations across all routers on the system
+
     [
         {
             "itemType": "destination",
@@ -158,6 +161,7 @@ Gets a specific destination by ID
 
 #### /routes
 Gets a list of all routes currently made on the system
+
     [
         {
             "itemType": "route",
@@ -181,6 +185,7 @@ Gets a list of all routes currently made on the system
     ]
 #### /route/source/:sourceId/destination/:destinationId
 Gets details about a route between :sourceId and :destinationId
+
     {
         "itemType": "route",
         "destinationid": "1",
@@ -193,6 +198,7 @@ Gets details about a route between :sourceId and :destinationId
     
 #### /route/source/:sourceId
 Gets a list of all the routes originating from :sourceId
+
     [
         {
             "itemType": "route",
@@ -217,6 +223,7 @@ Gets a list of all the routes originating from :sourceId
     
 #### /route/destination/:destinationId
 Gets the current route ending up at :destinationId
+
     {
         "itemType": "route",
         "destinationid": "1",
@@ -229,6 +236,7 @@ Gets the current route ending up at :destinationId
     
 #### /memoryslots
 Gets a list of all the current (set) MemorySlots
+
     [
         {
             "itemType": "memoryslot",
@@ -248,6 +256,7 @@ Gets a list of all the current (set) MemorySlots
     
 #### /memoryslot/:slotName
 Gets the information about memoryslot called :slotName
+
     {
         "itemType": "memoryslot",
         "number": "0",
