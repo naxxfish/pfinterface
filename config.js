@@ -5,7 +5,7 @@ config.debug = true
 config.pathfinder = {
 	'user' : 'PFInterface',
 	'password' : 'PFInterface',
-	'host' : 'localhost',
+	'host' : '192.168.1.75',
 	'port' : 9500
 }
 config.http = {
@@ -13,7 +13,7 @@ config.http = {
 }
 config.stomp = {
 	'enabled': false,
-	'host' : "localhost",
+	'host' : "192.168.1.75",
 	'port' :61613,
 	'login' : "guest",
 	'passcode': "guest",
