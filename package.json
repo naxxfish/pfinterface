@@ -6,7 +6,7 @@
 	"An interface to PathfinderPC exposing methods as a HTTP REST API.  Also can optionally send messages to a STOMP compatible Message Queue server",
   "dependencies": {
     "express": "3.x",
-    "pfint": "naxxfish/pfint"
+    "pfint": "0.0.1"
   },
   "optionalDependencies": {
     "stomp": "~0.1.1"    
