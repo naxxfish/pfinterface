@@ -10,7 +10,7 @@ config.http = {
 	'port' : 8080
 }
 config.stomp = {
-	'enabled': true,
+	'enabled': false,
 	'host' : "localhost",
 	'port' :61613,
 	'login' : "guest",
