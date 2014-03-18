@@ -1,9 +1,8 @@
 {
-  "name": "PFInterface",
+  "name": "PFInterfaceWeb",
   "version": "0.0.1",
   "dependencies": {
     "express": "3.x",
-    "nedb": "~0.10.4",
     "stompjs": "~2.3.1"
   }
 }

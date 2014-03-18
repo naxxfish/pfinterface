@@ -8,11 +8,11 @@ For information about PathfinderPC, go to www.pathfinderpc.com
 
 var express = require('express')
 var pfint = require('pfint')
-var Datastore = require('nedb')
+
 var config = require('./config')
 
 // create the database for pfint to use
-var state =  new Datastore();
+
 
 // EDIT THESE BITS!
 pfint.sync({
@@ -20,7 +20,7 @@ pfint.sync({
 		'password' : config.pathfinder.password,
 		'host' : config.pathfinder.host,
 		'port' : config.pathfinder.port
-	}, state)
+	})
 
 
 // API methods coming right up
@@ -29,7 +29,7 @@ var app = express()
 app.get('/server',function (request, response)
 {
 	console.log(request)
-	state.findOne({'itemType' : 'pathfinderserver'}, function(err, server)
+	pfint.findOne({'itemType' : 'pathfinderserver'}, function(err, server)
 	{
 		response.end(JSON.stringify(server))		
 	})
@@ -37,7 +37,7 @@ app.get('/server',function (request, response)
 // What protocol translators are there/
 app.get('/translators',function (request, response)
 {
-	state.find({'itemType' : 'protocoltranslator'}, function(err, pt)
+	pfint.find({'itemType' : 'protocoltranslator'}, function(err, pt)
 	{
 		response.end(JSON.stringify(pt))		
 	})
@@ -46,7 +46,7 @@ app.get('/translators',function (request, response)
 // get all memory slots
 app.get('/memoryslots',function (request, response)
 {
-	state.find({'itemType' : 'memoryslot'}, function(err, slot)
+	pfint.find({'itemType' : 'memoryslot'}, function(err, slot)
 	{
 		//console.log(slot)
 		response.end(JSON.stringify(slot))		
@@ -57,7 +57,7 @@ app.get('/memoryslots',function (request, response)
 // what's at memory slot x?
 app.get('/memoryslot/:msName',function (request, response)
 {
-	state.findOne({'itemType' : 'memoryslot', 'name' : request.param("msName")}, function(err, slot)
+	pfint.findOne({'itemType' : 'memoryslot', 'name' : request.param("msName")}, function(err, slot)
 	{
 		//console.log(slot)
 		response.end(JSON.stringify(slot))		
@@ -66,7 +66,7 @@ app.get('/memoryslot/:msName',function (request, response)
 // list of all routers
 app.get('/routers',function (request, response)
 {
-	state.find({'itemType' : 'router'}, function(err, data)
+	pfint.find({'itemType' : 'router'}, function(err, data)
 	{
 		response.end(JSON.stringify(data))		
 	})
@@ -75,7 +75,7 @@ app.get('/routers',function (request, response)
 // list of all sources
 app.get('/sources', function (request, response)
 {
-	state.find({'itemType' : 'source'}, function (err, data)
+	pfint.find({'itemType' : 'source'}, function (err, data)
 	{
 		response.end(JSON.stringify(data))
 	});
@@ -84,7 +84,7 @@ app.get('/sources', function (request, response)
 // what's source x?
 app.get('/source/:sourceNum', function (request, response)
 {
-	state.findOne({'itemType' : 'source', 'id' : request.param("sourceNum")}, function (err, data)
+	pfint.findOne({'itemType' : 'source', 'id' : request.param("sourceNum")}, function (err, data)
 	{
 		response.end(JSON.stringify(data))
 	});
@@ -92,7 +92,7 @@ app.get('/source/:sourceNum', function (request, response)
 
 app.get('/destinations', function (request, response)
 {
-	state.find({'itemType' : 'destination'}, function (err, data)
+	pfint.find({'itemType' : 'destination'}, function (err, data)
 	{
 		response.end(JSON.stringify(data))
 	});
@@ -101,7 +101,7 @@ app.get('/destinations', function (request, response)
 // What's destination x ?
 app.get('/destination/:destinationNum', function (request, response)
 {
-	state.findOne({'itemType' : 'destination', 'id' : request.param("destinationNum")}, function (err, data)
+	pfint.findOne({'itemType' : 'destination', 'id' : request.param("destinationNum")}, function (err, data)
 	{
 		response.end(JSON.stringify(data))
 	});
@@ -110,7 +110,7 @@ app.get('/destination/:destinationNum', function (request, response)
 //list of all crosspoints
 app.get('/routes', function (request, response)
 {
-	state.find({'itemType' : 'route'}, function (err, data)
+	pfint.find({'itemType' : 'route'}, function (err, data)
 	{
 		response.end(JSON.stringify(data))
 	});
@@ -120,7 +120,7 @@ app.get('/routes', function (request, response)
 
 app.get('/route/source/:sourceNum/destination/:destinationNum', function (request, response)
 {
-	state.findOne({
+	pfint.findOne({
 		'itemType' : 'route', 
 		'sourceid' : request.param("sourceNum"), 
 		'destinationid' : request.param("destinationNum")
@@ -135,7 +135,7 @@ app.get('/route/source/:sourceNum/destination/:destinationNum', function (reques
 app.get('/route/destination/:destNum', function (request, response)
 {
 	// you can only have one source routerd to a destination
-	state.findOne({
+	pfint.findOne({
 		'itemType' : 'route', 
 		'destinationid' : request.param("destNum")
 		}, function (err, data)
@@ -148,7 +148,7 @@ app.get('/route/destination/:destNum', function (request, response)
 
 app.get('/route/source/:sourceNum', function (request, response)
 {
-	state.find({
+	pfint.find({
 		'itemType' : 'route', 
 		'sourceid' : request.param("sourceNum")
 		}, function (err, data)
@@ -159,7 +159,7 @@ app.get('/route/source/:sourceNum', function (request, response)
 
 app.get('/gpio', function (request, response)
 {
-	state.find({
+	pfint.find({
 		'itemType' : 'gpi'
 		}, function (err, data)
 		{

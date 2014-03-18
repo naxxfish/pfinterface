@@ -9,8 +9,12 @@ The purpose of this program is to provide a simple, read-only interface into Pat
 The program will start up and connect to the SAPort default translator (port 9500).  It will keep an internal database with the state of Pathfinder Server being kept in sync.  This database may be queried via a HTTP interface on port 8080
 
 Make sure you do
+
     npm install
 
+To run it, either run the batch file, or do
+
+    node interface.js
 
 ### Methods
 All methods are HTTP GET
