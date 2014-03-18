@@ -1,21 +1,30 @@
 // pfinterface 
+/*
+PathfinderPC interface.  
+Chris Roberts <chris@naxxfish.eu>
+
+For information about PathfinderPC, go to www.pathfinderpc.com
+*/
 
 var express = require('express')
 var pfint = require('pfint')
 var Datastore = require('nedb')
+var config = require('./config')
 
-var app = express()
-//app.use(express.static(__dirname + "/public"));
-
+// create the database for pfint to use
 var state =  new Datastore();
 
+// EDIT THESE BITS!
 pfint.sync({
-		'user' : 'PFInterface',
-		'password' : 'PFInterface',
-		'host' : "localhost",
-		'port' : 9500
+		'user' : config.pathfinder.user,
+		'password' : config.pathfinder.password,
+		'host' : config.pathfinder.host,
+		'port' : config.pathfinder.port
 	}, state)
-	
+
+
+// API methods coming right up
+var app = express()
 // what server are we running?
 app.get('/server',function (request, response)
 {
@@ -158,5 +167,5 @@ app.get('/gpio', function (request, response)
 		});
 });
 
-app.listen(8080)
+app.listen(config.http.port)
 console.log("Web Interface Started")
