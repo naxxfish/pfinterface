@@ -7,7 +7,7 @@ For information about PathfinderPC, go to www.pathfinderpc.com
 */
 
 var express = require('express')
-var PFInterface = require('pfint')
+var PFInterface = require('PFInterface')
 
 var config = require('./config')
 
@@ -69,10 +69,14 @@ if (stomp && config.stomp.enabled)
 }
 if (config.debug)
 {
-	pfint.on('debug', function (message)
-	{
-		console.log("PFInt: " + JSON.stringify(message))
-	});
+	pfint.on('customCommand', function (command)
+		{
+			if (config.debug)
+			{
+				console.log("Custom command: " + command)
+			}
+		}
+	);
 }
 pfint.sync({
 		'user' : config.pathfinder.user,
