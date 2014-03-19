@@ -271,3 +271,9 @@ Gets the information about memoryslot called :slotName
         "value": "Doobery",
         "_id": "8gDDPnzgzSkbIK30"
     }
+
+
+### Credits
+So far, all done by me (Chris)
+
+Like it? Send me some Bitcoins? 1GTw3bJ5UB7g2upzzvXarJ9VZX3gREdpgG
