@@ -5,7 +5,7 @@ config.debug = true
 config.pathfinder = {
 	'user' : 'PFInterface',
 	'password' : 'PFInterface',
-	'host' : '192.168.1.75',
+	'host' : '127.0.0.1',
 	'port' : 9500
 }
 config.http = {
@@ -13,14 +13,14 @@ config.http = {
 }
 config.stomp = {
 	'enabled': false,
-	'host' : "192.168.1.75",
+	'host' : "localhost",
 	'port' :61613,
 	'login' : "guest",
 	'passcode': "guest",
 	'queues' : {
-		'memoryslot': "/queue/pathfinder.events",
-		'route': "/queue/pathfinder.events",
-		'custom': "/queue/pathfinder.events"
+		'memoryslot': "/exchange/pathfinder.memoryslots",
+		'route': "/exchange/pathfinder.routes",
+		'custom': "/exchange/pathfinder.events"
 	}
 }
 module.exports = config;
