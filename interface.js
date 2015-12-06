@@ -23,14 +23,15 @@ try {
 	stomp = null
 }
 
-if (stomp && config.stomp.enabled)
+function stompConnect()
 {
 	var stomp_args = {
 		port: config.stomp['port'], //61613,
 		host: config.stomp['host'],
 		debug: true,
 		login: config.stomp['login'],
-		passcode: config.stomp['passcode']
+		passcode: config.stomp['passcode'],
+		reconnectOpts: {retries:9999999, delay:100}
 	}
 	stompdebug(stomp_args)
 
@@ -42,6 +43,7 @@ if (stomp && config.stomp.enabled)
 			stompdebug("RECEIPT: ", receipt);
 		});
 		stompClient.on('connected', function(){
+			console.log("Connected to STOMP broker")
 			pfint.on('memorySlot', function (slot)
 			{
 				stompClient.send(
@@ -50,12 +52,17 @@ if (stomp && config.stomp.enabled)
 					'body' : JSON.stringify(slot)
 				}, true)
 			});
+			pfint.on('route', function (route) {
+				stompdebug("route", route);
+				stompClient.send(
+				{
+					'destination': config.stomp.queues['route'],
+					'body': JSON.stringify(route)
+				}, true)
+			})
 			pfint.on('customCommand', function (command)
 			{
-				if (config.debug)
-				{
-					stompdebug("Custom command: " + command)
-				}
+				stompdebug("Custom command: " + command)
 				stompClient.send(
 				{
 					'destination' : config.stomp.queues['custom'],
@@ -64,14 +71,36 @@ if (stomp && config.stomp.enabled)
 			});
 		})
 		stompClient.on('error', function (err){
-			stompdebug("Some kind of error has occurred ", err);
+			stompdebug("STOMP error ", err);
 		});
+		stompClient.on('disconnected', function(){
+			stompdebug('disconnected from broker, trying to reconnect');
+			setTimeout(	function() { stompClient.connect() } ,5000 )
+		})
+		stompClient.on('reconnected', function (){
+			stompdebug("reconnected");
+		});
+		stompClient.on('reconnecting', function (){
+			stompdebug("reconnecting");
+		})
 	} catch (err)
 	{
 		stompdebug("Couldn't connect to STOMP server! :(", err)
 	} 
 }
+	
 
+if (stomp && config.stomp.enabled)
+{
+	stompConnect()
+}
+
+pfint.on('error', function ()
+{
+	console.log("Could not connect to PathfinderPC (is the server running?)");
+	process.exit(5);
+	
+});
 pfint.sync({
 		'user' : config.pathfinder.user,
 		'password' : config.pathfinder.password,
