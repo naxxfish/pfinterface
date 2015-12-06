@@ -6,7 +6,7 @@
   "dependencies": {
     "debug": "^2.2.0",
     "express": "3.x",
-    "pfint": "0.0.1"
+    "pfint": "0.0.2"
   },
   "optionalDependencies": {
     "stomp": "~0.1.1"
