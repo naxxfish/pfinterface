@@ -110,10 +110,15 @@ pfint.sync({
 
 // API methods coming right up
 var app = express()
+// add body parser so we can get POST parameters 
+var bodyParser = require('body-parser');
+app.use(bodyParser.json()); // support json encoded bodies
+app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
+
 // what server are we running?
 app.get('/server',function (request, response)
 {
-	wwwdebug(request);
+	wwwdebug('server');
 	pfint.findOne({'itemType' : 'pathfinderserver'}, function(err, server)
 	{
 		response.end(JSON.stringify(server))		
@@ -122,7 +127,7 @@ app.get('/server',function (request, response)
 // What protocol translators are there/
 app.get('/translators',function (request, response)
 {
-	wwwdebug(request);
+	wwwdebug('translators');
 	pfint.find({'itemType' : 'protocoltranslator'}, function(err, pt)
 	{
 		response.end(JSON.stringify(pt))		
@@ -132,27 +137,47 @@ app.get('/translators',function (request, response)
 // get all memory slots
 app.get('/memoryslots',function (request, response)
 {
-	wwwdebug(request);
+	wwwdebug('memoryslots');
 	pfint.find({'itemType' : 'memoryslot'}, function(err, slot)
 	{
 		response.end(JSON.stringify(slot))		
 	})
 });
 
+// set a memory slot
+app.post('/memoryslot/:msName', function (request, response) 
+{
+	wwwdebug('memoryslot/' + request.param("msName"));
+	if (config.pathfinder.settableSlots.indexOf(request.param("msName")) == -1)
+	{
+		// not allowed
+		response.end(JSON.stringify({'error':'not authorised'}))
+	} else {
+		pfint.setMemorySlot(request.param("msName"), request.body.msValue, function (err, slot) {
+			response.end(JSON.stringify(slot));
+		})
+	}
+});
 
 // what's at memory slot x?
 app.get('/memoryslot/:msName',function (request, response)
 {
-	wwwdebug(request);
+	wwwdebug('memoryslot/' + request.param("msName"));
+	wwwdebug(request.body);
 	pfint.findOne({'itemType' : 'memoryslot', 'name' : request.param("msName")}, function(err, slot)
 	{
-		response.end(JSON.stringify(slot))		
+		if (slot != null)
+		{
+			response.end(JSON.stringify(slot))		
+		} else {
+			response.end(JSON.stringify({'error':'no such memory slot'}));
+		}
 	})
 });
 // list of all routers
 app.get('/routers',function (request, response)
 {
-	wwwdebug(request);
+	wwwdebug('routers');
 	pfint.find({'itemType' : 'router'}, function(err, data)
 	{
 		response.end(JSON.stringify(data))		
@@ -162,7 +187,7 @@ app.get('/routers',function (request, response)
 // list of all sources
 app.get('/sources', function (request, response)
 {
-	wwwdebug(request);
+	wwwdebug('sources');
 	pfint.find({'itemType' : 'source'}, function (err, data)
 	{
 		response.end(JSON.stringify(data))
@@ -172,16 +197,21 @@ app.get('/sources', function (request, response)
 // what's source x?
 app.get('/source/:sourceNum', function (request, response)
 {
-	wwwdebug(request);
+	wwwdebug('source/' + request.param("sourceNum"));
 	pfint.findOne({'itemType' : 'source', 'id' : request.param("sourceNum")}, function (err, data)
 	{
-		response.end(JSON.stringify(data))
+		if (data != null)
+		{
+			response.end(JSON.stringify(data))
+		} else {
+			response.end(JSON.stringify({'error':'no such source'}));
+		}
 	});
 });
 
 app.get('/destinations', function (request, response)
 {
-	wwwdebug(request);
+	wwwdebug('destinations');
 	pfint.find({'itemType' : 'destination'}, function (err, data)
 	{
 		response.end(JSON.stringify(data))
@@ -191,17 +221,22 @@ app.get('/destinations', function (request, response)
 // What's destination x ?
 app.get('/destination/:destinationNum', function (request, response)
 {
-	wwwdebug(request);
+	wwwdebug('destination/' + request.param("destinationNum"));
 	pfint.findOne({'itemType' : 'destination', 'id' : request.param("destinationNum")}, function (err, data)
 	{
-		response.end(JSON.stringify(data))
+		if (data != null)
+		{
+			response.end(JSON.stringify(data))
+		} else {
+			response.end(JSON.stringify({'error':'no such destination'}));
+		}
 	});
 });
 
 //list of all crosspoints
 app.get('/routes', function (request, response)
 {
-	wwwdebug(request);
+	wwwdebug('routes');
 	pfint.find({'itemType' : 'route'}, function (err, data)
 	{
 		response.end(JSON.stringify(data))
@@ -212,7 +247,7 @@ app.get('/routes', function (request, response)
 
 app.get('/route/source/:sourceNum/destination/:destinationNum', function (request, response)
 {
-	wwwdebug(request);
+	wwwdebug('route/source/' + request.param("sourceNum") + '/destination/' + request.param("destinationNum"));
 	pfint.findOne({
 		'itemType' : 'route', 
 		'sourceid' : request.param("sourceNum"), 
@@ -227,7 +262,7 @@ app.get('/route/source/:sourceNum/destination/:destinationNum', function (reques
 
 app.get('/route/destination/:destNum', function (request, response)
 {
-	wwwdebug(request);
+	wwwdebug('route/destination/' + request.param("destinationNum"));
 	// you can only have one source routerd to a destination
 	pfint.findOne({
 		'itemType' : 'route', 
@@ -242,7 +277,7 @@ app.get('/route/destination/:destNum', function (request, response)
 
 app.get('/route/source/:sourceNum', function (request, response)
 {
-	wwwdebug(request);
+	wwwdebug('route/source/' + request.param("sourceNum"));
 	pfint.find({
 		'itemType' : 'route', 
 		'sourceid' : request.param("sourceNum")
@@ -254,7 +289,7 @@ app.get('/route/source/:sourceNum', function (request, response)
 
 app.get('/gpio', function (request, response)
 {
-	wwwdebug(request);
+	wwwdebug('gpio');
 	pfint.find({
 		'itemType' : 'gpi'
 		}, function (err, data)

@@ -4,6 +4,7 @@
   "version": "0.0.1",
   "description": "An interface to PathfinderPC exposing methods as a HTTP REST API.  Also can optionally send messages to a STOMP compatible Message Queue server",
   "dependencies": {
+    "body-parser": "^1.15.0",
     "debug": "^2.2.0",
     "express": "3.x",
     "pfint": "0.0.2"

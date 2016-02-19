@@ -271,10 +271,34 @@ Gets the information about memoryslot called :slotName
         "value": "Doobery",
         "_id": "8gDDPnzgzSkbIK30"
     }
+	
+'''BETA'''
+If you POST to this path, you can now SET a memory slot, for example:
 
+    /memoryslot/hello
+
+POST data:
+
+    msValue=123
+
+will set MemorySlot hello to be 123.
+
+It will return the same format as you would with a GET, except obviously it will have set the value first :)
+
+You need to allow the memoryslot to be settable in the config.js file, by adding an array to config.pathfinder.settableSlots, e.g.
+
+    config.pathfinder = {
+    	'user' : 'PFInterface',
+    	'password' : 'PFInterface',
+    	'host' : '127.0.0.1',
+    	'port' : 9500,
+    	'settableSlots' : [
+    		"hello",
+    		"test",
+    		"123"
+    	]
+    }
 
 ### Credits
 So far, all done by me (Chris)
 
-Like it? Send me some Bitcoins? 1GTw3bJ5UB7g2upzzvXarJ9VZX3gREdpgG
-![1GTw3bJ5UB7g2upzzvXarJ9VZX3gREdpgG](http://naxxfish.files.wordpress.com/2014/02/desktop_wallet_code.png)
