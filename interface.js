@@ -120,7 +120,11 @@ pfint.sync({
 		'host' : config.pathfinder.host,
 		'port' : config.pathfinder.port
 	})
-
+	
+pfint.on('connected', function ()
+{
+	console.log("PathfinderPC Server Connected")
+})
 // API methods coming right up
 var app = express()
 // add body parser so we can get POST parameters 
