@@ -5,7 +5,7 @@
 	  "email": "chris@naxxfish.eu",
 	  "url": "http://naxxfish.eu/"
   },
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "An interface to PathfinderPC exposing methods as a HTTP REST API.  Also can optionally send messages to a STOMP compatible Message Queue server",
   "dependencies": {
     "body-parser": "^1.15.0",
