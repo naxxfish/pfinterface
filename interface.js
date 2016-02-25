@@ -98,7 +98,7 @@ function stompConnect()
 }
 	
 
-if (stomp && config.stomp.enabled)
+if (stomp && config.stomp)
 {
 	stompConnect()
 }
@@ -208,34 +208,42 @@ app.get('/memoryslots',function (request, response)
 app.post('/memoryslot/:msName', function (request, response) 
 {
 	wwwdebug(request.user,'memoryslot/' + request.param("msName"));
-	// can we do this thing?
-	if (!config.auth)
+	if (config.pathfinder.settableSlots)
 	{
-		response.status(401).end(JSON.stringify({'error':'authentication required for this feature'}))
-		return
-	}
-	if (!config.auth.acl)
-	{
-		response.status(500).end(JSON.stringify({'error':'configuration file not set up properly, no acl'}))
-	}
-	if (config.auth.acl[request.user])
-	{
-		if (config.auth.acl[request.user].write == "*" || config.auth.acl[request.user].write.indexOf(request.param("msName")) != -1)
-		{
-			pfint.setMemorySlot(request.param("msName"), request.body.msValue, function (err, slot) {
-					if (slot != null)
-					{
-						response.end(JSON.stringify(slot))		
-					} else {
-						response.end(JSON.stringify({'error':'no such memory slot'}));
-					}
-			})
-		} else {
-			response.status(401).end(JSON.stringify({'error':'user not authorised to access that memory slot'}))
+		// there is a list of settable slots
+		if (config.pathfinder.settableSlots.indexOf(request.param("msName")) == -1)
+		{	// and this memory slot is not in them
+			response.status(401).end(JSON.stringify({'error':'memory slot not settable'}))
+			return
 		}
-	} else {
-		response.status(401).end(JSON.stringify({'error':'user not authorised to access memory slots'}))
 	}
+	// can we do this thing?
+	if (config.auth)
+	{
+		if (!config.auth.acl)
+		{
+			response.status(500).end(JSON.stringify({'error':'configuration file not set up properly, no acl'}))
+			return
+		}
+		if (!config.auth.acl[request.user])
+		{
+			response.status(401).end(JSON.stringify({'error':'user not present in the ACL'}))
+			return
+		}
+		if (config.auth.acl[request.user].write == "*" || config.auth.acl[request.user].write.indexOf(request.param("msName")) != -1)
+		{	
+			response.status(401).end(JSON.stringify({'error':'user not authorised to access that memory slot'}))
+			return
+		}
+	}
+	pfint.setMemorySlot(request.param("msName"), request.body.msValue, function (err, slot) {
+		if (slot != null)
+		{
+			response.end(JSON.stringify(slot))		
+		} else {
+			response.end(JSON.stringify({'error':'no such memory slot'}));
+		}
+	})		
 });
 
 // what's at memory slot x?
@@ -244,35 +252,33 @@ app.get('/memoryslot/:msName',function (request, response)
 	wwwdebug('memoryslot/' + request.param("msName"));
 	wwwdebug(request.body);
 	// can we do this thing?
-	if (!config.auth)
+	if (config.auth)
 	{
-		response.status(401).end(JSON.stringify({'error':'authentication required for this feature'}))
-		return
-	}
-	if (!config.auth.acl)
-	{
-		response.status(500).end(JSON.stringify({'error':'configuration file not set up properly, no acl'}))
-	}	
-	if (config.auth.acl[request.user])
-	{
-		if (config.auth.acl[request.user].read == "*" || config.auth.acl[request.user].read.indexOf(request.param("msName")) != -1)
+		if (!config.auth.acl)
 		{
-			pfint.findOne({'itemType' : 'memoryslot', 'name' : request.param("msName")}, function(err, slot)
-			{
-				if (slot != null)
-				{
-					response.end(JSON.stringify(slot))		
-				} else {
-					response.end(JSON.stringify({'error':'no such memory slot'}));
-				}
-			})			
-		} else {
-			response.status(401).end(JSON.stringify({'error':'user not authorised to access that memory slot'}))
+			response.status(500).end(JSON.stringify({'error':'configuration file not set up properly, no acl'}))
+			return
 		}
-	} else {
-		response.status(401).end(JSON.stringify({'error':'user not authorised to access memory slots'}))
+		if (!config.auth.acl[request.user])
+		{
+			response.status(401).end(JSON.stringify({'error':'user not present in the ACL'}))
+			return
+		}
+		if (config.auth.acl[request.user].write == "*" || config.auth.acl[request.user].write.indexOf(request.param("msName")) != -1)
+		{	
+			response.status(401).end(JSON.stringify({'error':'user not authorised to access that memory slot'}))
+			return
+		}
 	}
-
+	pfint.findOne({'itemType' : 'memoryslot', 'name' : request.param("msName")}, function(err, slot)
+	{
+		if (slot != null)
+		{
+			response.end(JSON.stringify(slot))		
+		} else {
+			response.end(JSON.stringify({'error':'no such memory slot'}));
+		}
+	})			
 });
 // list of all routers
 app.get('/routers',function (request, response)

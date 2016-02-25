@@ -6,7 +6,12 @@ config.pathfinder = {
 	user : 'PFInterface',
 	password : 'PFInterface',
 	host : '127.0.0.1',
-	port : 9500
+	port : 9500,
+	settableSlots : [ // DEPRECATED if you use the ACL functionality below you can remove this field
+		"hello",
+		"test",
+		"123"
+	]
 }
 
 config.http = {
@@ -36,7 +41,6 @@ config.auth = {
 */
 
 /*config.stomp = {
-	enabled: true,
 	host : "localhost",
 	port :61613,
 	login : "pfinterface",
