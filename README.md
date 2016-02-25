@@ -16,6 +16,68 @@ To run it, either run the batch file, or do
 
     node interface.js
 
+### Debugging
+You can enable debugging of various elements by setting the environment variable DEBUG to one of the following:
+ * stomp-pfinterface - for stuff to do with the STOMP interface
+ * www-pfinterface - for stuff to do with the web interface
+ * pfint - for the mucky details about talking to PathfinderPC.
+	
+### Configuration
+To configure, edit the config.js file.  
+
+The settings concerned with connecting to the PathfinderPC Server are defined in the `config.pathfinder` section:
+
+    config.pathfinder = {
+    	'user' : 'PFInterface',  // the "user" in the PathfinderPC server to log in as
+    	'password' : 'PFInterface',	// the password that user has in PathfinderPC server
+    	'host' : '127.0.0.1', // the address of the PathfinderPC server
+    	'port' : 9500 // the Protocol Translator port on the PathfinderPC Server (default is 9500)
+    }
+
+	
+The settings around the HTTP server are in the below.  This section is required:
+    config.http = {
+    	'port' : 8080 // what port to listen on
+    }
+	
+The authentications settings are available in the auth section.  Currently we support HTTP Digest only.  If you need to create the htdigest file and don't have a tool to do it, you can install gevorg's one here: [htdigest](https://github.com/gevorg/htdigest/).  
+
+You will '''need''' to set up authentication to allow setting or reading of memory slots to work.
+
+    config.auth = {
+    	realm: 'PathfinderPC',	// the realm which you used in the htdigest file
+    	file: 'testfile.htdigest', // the htdigest file to use
+    	acl: 
+    	{
+    		'test': { // each user exists here, and restricts what memory slots they can read/write to
+    			'read' : '*', // either enter * for any and all memory slots
+    			'write': ['ONAIR'] // or specify a list of allowable slots. 
+    		}
+	    }
+    }
+	
+If you'd like to connect this up to a message queue server via STOMP, you can do that.  
+
+    config.stomp = {
+    	'enabled': true,
+    	'host' : "localhost",
+    	'port' :61613,
+    	'login' : "pfinterface",
+    	'passcode': "pfinterface",
+    	'queues' : {
+			// you may want to change these depending on your message queue sever setup
+    		'memoryslot': "/exchange/pathfinder.memoryslots",  // all memory slot changes
+    		'route': "/exchange/pathfinder.routes", // any route changes
+    		'custom': "/exchange/pathfinder.events" // any other events that are recieved and not covered by the two above
+    	}
+    }
+	
+Always keep the below at the end of the file:
+
+    module.exports = config;
+
+Yeah, I know - not the ideal way to do configuration, but it's convenient enough! 
+	
 ### Methods
 All methods are HTTP GET
 #### /server
@@ -284,20 +346,6 @@ POST data:
 will set MemorySlot hello to be 123.
 
 It will return the same format as you would with a GET, except obviously it will have set the value first :)
-
-You need to allow the memoryslot to be settable in the config.js file, by adding an array to config.pathfinder.settableSlots, e.g.
-
-    config.pathfinder = {
-    	'user' : 'PFInterface',
-    	'password' : 'PFInterface',
-    	'host' : '127.0.0.1',
-    	'port' : 9500,
-    	'settableSlots' : [
-    		"hello",
-    		"test",
-    		"123"
-    	]
-    }
 
 ### Credits
 So far, all done by me (Chris)

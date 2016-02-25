@@ -6,16 +6,26 @@ config.pathfinder = {
 	'user' : 'PFInterface',
 	'password' : 'PFInterface',
 	'host' : '127.0.0.1',
-	'port' : 9500,
-	'settableSlots' : [
-		"hello",
-		"test",
-		"123"
-	]
+	'port' : 9500
 }
+
 config.http = {
 	'port' : 8080
 }
+
+config.auth = {
+	realm: 'PathfinderPC',
+	file: 'testfile.htdigest',
+	acl: 
+	{
+		'test': { // each user exists here
+			'read' : ['ONAIR'],
+			'write': ['ONAIR']
+		}
+	}
+}
+
+
 config.stomp = {
 	'enabled': true,
 	'host' : "localhost",
