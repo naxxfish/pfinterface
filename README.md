@@ -4,9 +4,9 @@ by Chris Roberts
 
 [PathfinderPC](http://www.pathfinderpc.com/) Server HTTP Interface
 
-The purpose of this program is to provide a simple, read-only interface into Pathfinder Server - queryable from HTTP via REST. 
+The purpose of this program is to provide a simple, interface into PathfinderPC Server - which is queryable via a HTTP request, or by a message through a STOMP broker. 
 
-The program will start up and connect to the SAPort default translator (port 9500).  It will keep an internal database with the state of Pathfinder Server being kept in sync.  This database may be queried via a HTTP interface on port 8080
+Once configured, this program can connect to the Main SAProtocol port configured in PathfinderPC Server.  You can configure this in PathfinderPC Server under File->Master TCP Port #.  If you prefer, you can create another Protocol Translator using the "Software Authority Protocol" set up as a TCP server, and specify the port number of that instead.  
 
 Make sure you do
 
@@ -18,12 +18,20 @@ To run it, either run the batch file, or do
 
 ### Debugging
 You can enable debugging of various elements by setting the environment variable DEBUG to one of the following:
- * stomp-pfinterface - for stuff to do with the STOMP interface
- * www-pfinterface - for stuff to do with the web interface
- * pfint - for the mucky details about talking to PathfinderPC.
+ * __stomp-pfinterface__ - for stuff to do with the STOMP interface
+ * __www-pfinterface__ - for stuff to do with the web interface
+ * __pfint__ - for the mucky details about talking to PathfinderPC.
 	
 ### Configuration
-To configure, edit the config.js file.  
+To configure, edit the config.js file.
+  
+Always keep the below at the end of the file:
+
+    module.exports = config;
+
+Yeah, I know - not the ideal way to do configuration, but it's convenient enough! 
+
+#### PathfinderPC Connection
 
 The settings concerned with connecting to the PathfinderPC Server are defined in the `config.pathfinder` section:
 
@@ -34,15 +42,24 @@ The settings concerned with connecting to the PathfinderPC Server are defined in
     	'port' : 9500 // the Protocol Translator port on the PathfinderPC Server (default is 9500)
     }
 
-	
-The settings around the HTTP server are in the below.  This section is required:
+#### HTTP Server	
+The settings around the HTTP server are in the below. You can't use a port number below 1024! This section is required:
     config.http = {
     	'port' : 8080 // what port to listen on
     }
 	
-The authentications settings are available in the auth section.  Currently we support HTTP Digest only.  If you need to create the htdigest file and don't have a tool to do it, you can install gevorg's one here: [htdigest](https://github.com/gevorg/htdigest/).  
+Optionally, if you have a SSL certificate and keyfile, you can run a HTTPS server on a given port by defining the following section:
+     config.https = {
+     	port: 8081,
+     	keyfile: 'server.key',
+     	cert: 'server.crt'
+     }
+	
+The authentications settings are available in the auth section.  Currently we support HTTP Digest authentication only.  If you need to create the htdigest file and don't have a tool to do it, you can use gevorg's one here: [htdigest](https://github.com/gevorg/htdigest/).  
 
-You will '''need''' to set up authentication to allow setting or reading of memory slots to work.
+You can also restrict the access to memoryslots for of a given user using the ACL.  In the example below, the user `test` may read any memory slot, but only write to `ONAIR` .  
+
+**N.B.** it's a very very good idea to set this up!
 
     config.auth = {
     	realm: 'PathfinderPC',	// the realm which you used in the htdigest file
@@ -56,7 +73,8 @@ You will '''need''' to set up authentication to allow setting or reading of memo
 	    }
     }
 	
-If you'd like to connect this up to a message queue server via STOMP, you can do that.  
+#### STOMP Server
+Whenever a Memory Slot is changed, or a route is made, an event is fired. When these events are fired we can send a message to a message broker topic using STOMP so that your client applications simply have to subscribe to the topic to recieve the events.  If you'd like to connect this up to a message queue server via STOMP, you can do that.  
 
     config.stomp = {
     	'enabled': true,
@@ -72,14 +90,12 @@ If you'd like to connect this up to a message queue server via STOMP, you can do
     	}
     }
 	
-Always keep the below at the end of the file:
 
-    module.exports = config;
-
-Yeah, I know - not the ideal way to do configuration, but it's convenient enough! 
 	
 ### Methods
-All methods are HTTP GET
+The below methods may be used to query the state of the PathfinderPC Server.  
+
+
 #### /server
 Provides a list of server information.
 
