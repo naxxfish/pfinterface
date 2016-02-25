@@ -5,7 +5,9 @@ Chris Roberts <chris@naxxfish.eu>
 
 For information about PathfinderPC, go to www.pathfinderpc.com
 */
-
+var fs = require('fs'),
+    http = require('http'),
+    https = require('https')
 var express = require('express')
 var auth = require('http-auth')
 var PFInterface = require('pfint')
@@ -14,6 +16,11 @@ var wwwdebug = require('debug')('www-pfinterface')
 var config = require('./config')
 
 // create the database for pfint to use
+
+console.log("PathfinderPC Interface");
+console.log("Chris Roberts (@naxxfish)");
+console.log("-----------------------------");
+
 
 var pfint = new PFInterface();
 
@@ -29,7 +36,7 @@ function stompConnect()
 	var stomp_args = {
 		port: config.stomp['port'], //61613,
 		host: config.stomp['host'],
-		debug: true,
+		debug: config.debug,
 		login: config.stomp['login'],
 		passcode: config.stomp['passcode'],
 		reconnectOpts: {retries:9999999, delay:100}
@@ -44,7 +51,7 @@ function stompConnect()
 			stompdebug("RECEIPT: ", receipt);
 		});
 		stompClient.on('connected', function(){
-			console.log("Connected to STOMP broker")
+			console.log("STOMP broker connected")
 			pfint.on('memorySlot', function (slot)
 			{
 				stompClient.send(
@@ -116,14 +123,56 @@ var bodyParser = require('body-parser');
 app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
+// start up the HTTP sever!
+
+if (config.http)
+{
+	if (config.http.port < 1024)
+	{
+		console.log("Can only run on unprivileged ports > 1024");
+		process.exit(5);
+	}
+	var http = http.createServer(app).listen(config.http.port, function ()
+	{
+		console.log("HTTP Interface Started on port " + config.http.port)
+	})
+
+}
+
+if (config.https)
+{
+	if (config.https.port < 1024)
+	{
+		console.log("Can only run on unprivileged ports > 1024");
+		process.exit(5);		
+	}
+	if (config.https.port && config.https.keyfile && config.https.cert && config.https.port)
+	{
+		fs.exists(config.https.keyfile, function() {
+			fs.exists(config.https.cert, function() {
+				var options = {
+					key: fs.readFileSync(config.https.keyfile),
+					cert: fs.readFileSync(config.https.cert)
+				}
+				var httpsserver = https.createServer(options,app).listen(config.https.port, function() {
+					console.log("HTTPS Interface Started on port " + config.https.port)
+				})
+			})
+		})
+
+	}
+}
+
 if (config.auth && config.auth.file && config.auth.realm)
 {
-	console.log("Enabling authentication")
-	var digest = auth.digest({
-		realm: config.auth.realm,
-		file: config.auth.file
+	fs.exists(config.auth.file,function() {
+		console.log("HTTP Digest authentication enabled (file) " + config.auth.file)
+		var digest = auth.digest({
+			realm: config.auth.realm,
+			file: config.auth.file
+		});
+		app.use(auth.connect(digest));
 	});
-	app.use(auth.connect(digest));
 }
 
 // what server are we running?
@@ -167,7 +216,7 @@ app.post('/memoryslot/:msName', function (request, response)
 	}
 	if (!config.auth.acl)
 	{
-		response.status(500).end(JSON.stringify({'error':'configuration file not set up properly, no acl'}}))
+		response.status(500).end(JSON.stringify({'error':'configuration file not set up properly, no acl'}))
 	}
 	if (config.auth.acl[request.user])
 	{
@@ -202,7 +251,7 @@ app.get('/memoryslot/:msName',function (request, response)
 	}
 	if (!config.auth.acl)
 	{
-		response.status(500).end(JSON.stringify({'error':'configuration file not set up properly, no acl'}}))
+		response.status(500).end(JSON.stringify({'error':'configuration file not set up properly, no acl'}))
 	}	
 	if (config.auth.acl[request.user])
 	{
@@ -349,5 +398,3 @@ app.get('/gpio', function (request, response)
 		});
 });
 
-app.listen(config.http.port)
-console.log("Web Interface Started")
