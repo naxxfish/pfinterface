@@ -340,6 +340,7 @@ Gets a list of all the current (set) MemorySlots
     ]
     
 #### /memoryslot/:slotName
+##### GET
 Gets the information about memoryslot called :slotName
 
     {
@@ -350,19 +351,20 @@ Gets the information about memoryslot called :slotName
         "_id": "8gDDPnzgzSkbIK30"
     }
 	
-'''BETA'''
-If you POST to this path, you can now SET a memory slot, for example:
+##### POST
+If you POST to this path, you can now SET a memory slot using the msValue paramter. 
 
-    /memoryslot/hello
+For example with cURL:
+      curl --data "msValue=hello" http://localhost:8080/memorySlot/ONAIR
 
-POST data:
+It will return some JSON in the same format as you would with a GET, for confirmation. 
 
-    msValue=123
 
-will set MemorySlot hello to be 123.
+### License
+Copyright (c) 2015 Chris Roberts
 
-It will return the same format as you would with a GET, except obviously it will have set the value first :)
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
-### Credits
-So far, all done by me (Chris)
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

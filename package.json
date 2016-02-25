@@ -16,5 +16,6 @@
   "repository": {
     "type": "git",
     "url": "http://github.com/naxxfish/pfinterface.git"
-  }
+  },
+  "license": "MIT"
 }
