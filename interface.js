@@ -82,14 +82,19 @@ function stompConnect()
 			stompdebug("STOMP error ", err);
 		});
 		stompClient.on('disconnected', function(){
-			stompdebug('disconnected from broker, trying to reconnect');
+			console.log("STOMP broker disconnected")
+			stompdebug('disconnected from broker, trying to reconnect')
+			pfint.removeAllListeners('route')
+			pfint.removeAllListeners('memorySlot')
+			pfint.removeAllListeners('customCommand')
 			setTimeout(	function() { stompClient.connect() } ,5000 )
 		})
 		stompClient.on('reconnected', function (){
-			stompdebug("reconnected");
+			console.log("STOMP broker reconnected")
+			stompdebug("reconnected")
 		});
 		stompClient.on('reconnecting', function (){
-			stompdebug("reconnecting");
+			stompdebug("reconnecting")
 		})
 	} catch (err)
 	{

@@ -40,7 +40,7 @@ config.auth = {
 }
 */
 
-/*config.stomp = {
+config.stomp = {
 	host : "localhost",
 	port :61613,
 	login : "pfinterface",
@@ -50,5 +50,5 @@ config.auth = {
 		route: "/exchange/pathfinder.routes",
 		custom: "/exchange/pathfinder.events"
 	}
-}*/
+}
 module.exports = config;
