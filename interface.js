@@ -21,9 +21,40 @@ var config = require('./config')
 //console.log("PathfinderPC Interface");
 //console.log("Chris Roberts (@naxxfish)");
 //console.log("-----------------------------");
+// API methods coming right up
+var app = express()
+// use bunyan for logging
+app.use(require('express-bunyan-logger')({
+	name: "http-interface",
+	streams: [
+		{
+			level: 'error',
+			stream: process.stdout
+		}
+		,
+		{
+		level: 'trace',
+		type: 'rotating-file',
+		path: 'logs/requests.log',
+		period: '1d', // daily rotation
+		count: 7 // one week log
+	}]
+}));
 
 var log = bunyan.createLogger({
-	name: "pfinterface"
+	name: "pfinterface",
+	streams: [{
+			level: 'info',
+			stream: process.stdout
+		},
+		{
+			level: 'trace',
+			type: 'rotating-file',
+			path: 'logs/pfinterface.log',
+			period: '1d', // daily rotation
+			count: 7 // one week log
+		}
+	]
 });
 log.info({
 	'module_version': module.exports.version,
@@ -91,15 +122,17 @@ function stompConnect() {
 				'destination': config.stomp.queues['memoryslot'],
 				'content-type': 'application/json'
 			}, JSON.stringify(slot), function(error) {
-				if (error)
-				{
+				if (error) {
 					log.error({
 						'component': 'stomp',
 						'event': 'error',
 						'error': error
 					})
 				} else {
-					log.debug({'component':'stomp','event':'message_sent'})
+					log.debug({
+						'component': 'stomp',
+						'event': 'message_sent'
+					})
 				}
 			})
 		});
@@ -152,6 +185,7 @@ pfint.on('error', function() {
 	//process.exit(5);
 
 });
+
 pfint.sync({
 	'user': config.pathfinder.user,
 	'password': config.pathfinder.password,
@@ -166,8 +200,8 @@ pfint.on('connected', function() {
 	})
 
 })
-// API methods coming right up
-var app = express()
+
+
 // add body parser so we can get POST parameters
 var bodyParser = require('body-parser');
 app.use(bodyParser.json()); // support json encoded bodies
