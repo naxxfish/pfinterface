@@ -1,21 +1,21 @@
 {
   "name": "pfinterfaceweb",
   "author": {
-	  "name": "Chris Roberts",
-	  "email": "chris@naxxfish.eu",
-	  "url": "http://naxxfish.eu/"
+    "name": "Chris Roberts",
+    "email": "chris@naxxfish.eu",
+    "url": "http://naxxfish.eu/"
   },
-  "version": "0.0.4",
+  "version": "0.0.7",
   "description": "An interface to PathfinderPC exposing methods as a HTTP REST API.  Also can optionally send messages to a STOMP compatible Message Queue server",
   "dependencies": {
     "body-parser": "^1.15.0",
+    "bunyan": "^1.8.12",
     "debug": "^2.2.0",
     "express": "3.x",
     "http-auth": "^2.2.8",
-    "pfint": "0.0.4"
-  },
-  "optionalDependencies": {
-    "stomp": "~0.1.1"
+    "pfint": "0.0.4",
+    "pkginfo": "^0.4.1",
+    "stompit": "^0.25.0"
   },
   "repository": {
     "type": "git",
