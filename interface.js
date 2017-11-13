@@ -8,15 +8,14 @@ For information about PathfinderPC, go to www.pathfinderpc.com
 var fs = require('fs'),
 	http = require('http'),
 	https = require('https')
-var express = require('express')
+var restify = require('restify');
 var pkginfo = require('pkginfo')(module);
 var fs = require('fs');
 var bunyan = require('bunyan')
 var auth = require('http-auth')
 var PFInterface = require('pfint')
-var stompdebug = require('debug')('stomp-pfinterface')
-var wwwdebug = require('debug')('www-pfinterface')
 var config = require('./config')
+var restifyBunyanLogger = require('restify-bunyan-logger');
 
 //console.log("PathfinderPC Interface");
 //console.log("Chris Roberts (@naxxfish)");
@@ -28,23 +27,25 @@ var logsDir = './logs';
 if (!fs.existsSync(logsDir)){
     fs.mkdirSync(logsDir);
 }
-var app = express()
-// use bunyan for logging
-app.use(require('express-bunyan-logger')({
-	name: "http-interface",
-	streams: [
-		{
-			level: 'error',
-			stream: process.stdout
-		},
-		{
-			level: 'trace',
-			type: 'rotating-file',
-			path: logsDir + '/requests.log',
-			period: '1d', // daily rotation
-			count: 7 // one week log
-	}]
-}));
+var server = restify.createServer({
+	log:  bunyan.createLogger({
+		name: "http-interface",
+		streams: [
+			{
+				level: 'error',
+				stream: process.stdout
+			},
+			{
+				level: 'debug',
+				type: 'rotating-file',
+				path: logsDir + '/requests.log',
+				period: '1d', // daily rotation
+				count: 7 // one week log
+		}]
+	})
+});
+
+server.on('after', restifyBunyanLogger());
 
 var log = bunyan.createLogger({
 	name: "pfinterface",
@@ -69,6 +70,7 @@ log.info({
 // create the database for pfint to use
 var pfint = new PFInterface();
 
+/* STOMP connection */
 try {
 	var stompit = require('stompit')
 } catch (er) {
@@ -209,13 +211,15 @@ pfint.on('connected', function() {
 
 })
 
+/* HTTP API */
 
-// add body parser so we can get POST parameters
+/*// add body parser so we can get POST parameters
 var bodyParser = require('body-parser');
-app.use(bodyParser.json()); // support json encoded bodies
-app.use(bodyParser.urlencoded({
+server.use(bodyParser.json()); // support json encoded bodies
+server.use(bodyParser.urlencoded({
 	extended: true
 })); // support encoded bodies
+*/
 
 // start up the HTTP sever!
 
@@ -228,17 +232,18 @@ if (config.http) {
 		});
 		process.exit(5);
 	}
-	var http = http.createServer(app).listen(config.http.port, function() {
+	server.listen(config.http.port, function() {
 		log.info({
 			'component': 'http',
 			'event': 'listening',
-			'port': config.http.port
+			'url': server.url
 		});
 	})
 
 }
 
-if (config.https) {
+// HTTPS support deprecated (for now!)
+/*if (config.https) {
 	if (config.https.port < 1024) {
 		log.error({
 			'component': 'https',
@@ -265,7 +270,7 @@ if (config.https) {
 		})
 
 	}
-}
+}*/
 
 if (config.auth && config.auth.file && config.auth.realm) {
 	fs.exists(config.auth.file, function() {
@@ -279,13 +284,12 @@ if (config.auth && config.auth.file && config.auth.realm) {
 			realm: config.auth.realm,
 			file: config.auth.file
 		});
-		app.use(auth.connect(digest));
+		server.use(auth.connect(digest));
 	});
 }
 
 // what server are we running?
-app.get('/server', function(request, response) {
-	wwwdebug('server', request.user);
+server.get('/server', function(request, response) {
 	pfint.findOne({
 		'itemType': 'pathfinderserver'
 	}, function(err, server) {
@@ -293,8 +297,7 @@ app.get('/server', function(request, response) {
 	})
 });
 // What protocol translators are there/
-app.get('/translators', function(request, response) {
-	wwwdebug('translators');
+server.get('/translators', function(request, response) {
 	pfint.find({
 		'itemType': 'protocoltranslator'
 	}, function(err, pt) {
@@ -303,8 +306,7 @@ app.get('/translators', function(request, response) {
 });
 
 // get all memory slots
-app.get('/memoryslots', function(request, response) {
-	wwwdebug('memoryslots');
+server.get('/memoryslots', function(request, response) {
 	pfint.find({
 		'itemType': 'memoryslot'
 	}, function(err, slot) {
@@ -313,8 +315,7 @@ app.get('/memoryslots', function(request, response) {
 });
 
 // set a memory slot
-app.post('/memoryslot/:msName', function(request, response) {
-	wwwdebug(request.user, 'memoryslot/' + request.param("msName"));
+server.post('/memoryslot/:msName', function(request, response) {
 	if (config.pathfinder.settableSlots) {
 		// there is a list of settable slots
 		if (config.pathfinder.settableSlots.indexOf(request.param("msName")) == -1) { // and this memory slot is not in them
@@ -357,9 +358,7 @@ app.post('/memoryslot/:msName', function(request, response) {
 });
 
 // what's at memory slot x?
-app.get('/memoryslot/:msName', function(request, response) {
-	wwwdebug('memoryslot/' + request.param("msName"));
-	wwwdebug(request.body);
+server.get('/memoryslot/:msName', function(request, response) {
 	// can we do this thing?
 	if (config.auth) {
 		if (!config.auth.acl) {
@@ -395,8 +394,7 @@ app.get('/memoryslot/:msName', function(request, response) {
 	})
 });
 // list of all routers
-app.get('/routers', function(request, response) {
-	wwwdebug('routers');
+server.get('/routers', function(request, response) {
 	pfint.find({
 		'itemType': 'router'
 	}, function(err, data) {
@@ -405,8 +403,7 @@ app.get('/routers', function(request, response) {
 });
 
 // list of all sources
-app.get('/sources', function(request, response) {
-	wwwdebug('sources');
+server.get('/sources', function(request, response) {
 	pfint.find({
 		'itemType': 'source'
 	}, function(err, data) {
@@ -415,8 +412,7 @@ app.get('/sources', function(request, response) {
 });
 
 // what's source x?
-app.get('/source/:sourceNum', function(request, response) {
-	wwwdebug('source/' + request.param("sourceNum"));
+server.get('/source/:sourceNum', function(request, response) {
 	pfint.findOne({
 		'itemType': 'source',
 		'id': request.param("sourceNum")
@@ -431,8 +427,7 @@ app.get('/source/:sourceNum', function(request, response) {
 	});
 });
 
-app.get('/destinations', function(request, response) {
-	wwwdebug('destinations');
+server.get('/destinations', function(request, response) {
 	pfint.find({
 		'itemType': 'destination'
 	}, function(err, data) {
@@ -441,8 +436,7 @@ app.get('/destinations', function(request, response) {
 });
 
 // What's destination x ?
-app.get('/destination/:destinationNum', function(request, response) {
-	wwwdebug('destination/' + request.param("destinationNum"));
+server.get('/destination/:destinationNum', function(request, response) {
 	pfint.findOne({
 		'itemType': 'destination',
 		'id': request.param("destinationNum")
@@ -458,8 +452,7 @@ app.get('/destination/:destinationNum', function(request, response) {
 });
 
 //list of all crosspoints
-app.get('/routes', function(request, response) {
-	wwwdebug('routes');
+server.get('/routes', function(request, response) {
 	pfint.find({
 		'itemType': 'route'
 	}, function(err, data) {
@@ -469,8 +462,7 @@ app.get('/routes', function(request, response) {
 
 // is there a route between source x and destination y?
 
-app.get('/route/source/:sourceNum/destination/:destinationNum', function(request, response) {
-	wwwdebug('route/source/' + request.param("sourceNum") + '/destination/' + request.param("destinationNum"));
+server.get('/route/source/:sourceNum/destination/:destinationNum', function(request, response) {
 	pfint.findOne({
 		'itemType': 'route',
 		'sourceid': request.param("sourceNum"),
@@ -482,8 +474,7 @@ app.get('/route/source/:sourceNum/destination/:destinationNum', function(request
 
 // what's routed to destination x?
 
-app.get('/route/destination/:destNum', function(request, response) {
-	wwwdebug('route/destination/' + request.param("destinationNum"));
+server.get('/route/destination/:destNum', function(request, response) {
 	// you can only have one source routerd to a destination
 	pfint.findOne({
 		'itemType': 'route',
@@ -495,8 +486,7 @@ app.get('/route/destination/:destNum', function(request, response) {
 
 // Where is source X routed?
 
-app.get('/route/source/:sourceNum', function(request, response) {
-	wwwdebug('route/source/' + request.param("sourceNum"));
+server.get('/route/source/:sourceNum', function(request, response) {
 	pfint.find({
 		'itemType': 'route',
 		'sourceid': request.param("sourceNum")
@@ -505,8 +495,7 @@ app.get('/route/source/:sourceNum', function(request, response) {
 	});
 });
 
-app.get('/gpio', function(request, response) {
-	wwwdebug('gpio');
+server.get('/gpio', function(request, response) {
 	pfint.find({
 		'itemType': 'gpi'
 	}, function(err, data) {
