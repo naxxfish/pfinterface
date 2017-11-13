@@ -1,10 +1,10 @@
 ## PFInterface
 
-by Chris Roberts 
+by Chris Roberts
 
-[PathfinderPC](http://www.pathfinderpc.com/) Server HTTP Interface
+[PathfinderPC](http://www.pathfinderpc.com/) Server HTTP and STOMP Interface
 
-The purpose of this program is to provide a simple, interface into PathfinderPC Server - which is queryable via a HTTP request, or by a message through a STOMP broker. 
+The purpose of this program is to provide a simple, interface into PathfinderPC Server - which is queryable via a HTTP request, or by a message through a STOMP broker.
 
 Once configured, this program can connect to the Main SAProtocol port configured in PathfinderPC Server.  You can configure this in PathfinderPC Server under File->Master TCP Port #.  If you prefer, you can create another Protocol Translator using the "Software Authority Protocol" set up as a TCP server, and specify the port number of that instead.  
 
@@ -16,20 +16,20 @@ To run it, either run the batch file, or do
 
     node interface.js
 
-### Debugging
-You can enable debugging of various elements by setting the environment variable DEBUG to one of the following:
- * __stomp-pfinterface__ - for stuff to do with the STOMP interface
- * __www-pfinterface__ - for stuff to do with the web interface
- * __pfint__ - for the mucky details about talking to PathfinderPC.
-	
+### Logging
+
+A directory inside the working directory called ```logs``` is created, into which log files are placed. pfinterface.log contains all log entries realted to the Pathfinder interface itself, and STOMP. request.log contains all requests served via HTTP.  These files are split into 1 day files, holding a maximum of 7 days of logs.
+
+Logs are created with [bunyan](https://github.com/trentm/node-bunyan) in JSON format. You can filter these files in various interesting ways using the ```bunyan``` [command line tool](http://trentm.com/node-bunyan/bunyan.1.html).
+
 ### Configuration
 To configure, edit the config.js file.
-  
+
 Always keep the below at the end of the file:
 
     module.exports = config;
 
-Yeah, I know - not the ideal way to do configuration, but it's convenient enough! 
+Yeah, I know - not the ideal way to do configuration, but it's convenient enough!
 
 #### PathfinderPC Connection
 
@@ -42,19 +42,20 @@ The settings concerned with connecting to the PathfinderPC Server are defined in
     	'port' : 9500 // the Protocol Translator port on the PathfinderPC Server (default is 9500)
     }
 
-#### HTTP Server	
+#### HTTP Server
 The settings around the HTTP server are in the below. You can't use a port number below 1024! This section is required:
     config.http = {
     	'port' : 8080 // what port to listen on
     }
-	
-Optionally, if you have a SSL certificate and keyfile, you can run a HTTPS server on a given port by defining the following section:
+
+~~Optionally, if you have a SSL certificate and keyfile, you can run a HTTPS server on a given port by defining the following section:~~ SSL support is deprecated (for now) until we figure out the right way to use it with restify.
+
      config.https = {
      	port: 8081,
      	keyfile: 'server.key',
      	cert: 'server.crt'
      }
-	
+
 The authentications settings are available in the auth section.  Currently we support HTTP Digest authentication only.  If you need to create the htdigest file and don't have a tool to do it, you can use gevorg's one here: [htdigest](https://github.com/gevorg/htdigest/).  
 
 You can also restrict the access to memoryslots for of a given user using the ACL.  In the example below, the user `test` may read any memory slot, but only write to `ONAIR` .  
@@ -64,15 +65,15 @@ You can also restrict the access to memoryslots for of a given user using the AC
     config.auth = {
     	realm: 'PathfinderPC',	// the realm which you used in the htdigest file
     	file: 'testfile.htdigest', // the htdigest file to use
-    	acl: 
+    	acl:
     	{
     		'test': { // each user exists here, and restricts what memory slots they can read/write to
     			'read' : '*', // either enter * for any and all memory slots
-    			'write': ['ONAIR'] // or specify a list of allowable slots. 
+    			'write': ['ONAIR'] // or specify a list of allowable slots.
     		}
 	    }
     }
-	
+
 #### STOMP Server
 Whenever a Memory Slot is changed, or a route is made, an event is fired. When these events are fired we can send a message to a message broker topic using STOMP so that your client applications simply have to subscribe to the topic to recieve the events.  If you'd like to connect this up to a message queue server via STOMP, you can do that.  
 
@@ -89,9 +90,9 @@ Whenever a Memory Slot is changed, or a route is made, an event is fired. When t
     		'custom': "/exchange/pathfinder.events" // any other events that are recieved and not covered by the two above
     	}
     }
-	
 
-	
+
+
 ### Methods
 The below methods may be used to query the state of the PathfinderPC Server.  
 
@@ -127,7 +128,7 @@ Gets a list of all the routers in the system
             "_id": "7ltisyUNmcwLI77Q"
         }
     ]
-    
+
 #### /translators
 Gets a list of all the current protocol translators set up on the system
 
@@ -155,7 +156,7 @@ Gets a list of all the current protocol translators set up on the system
             "_id": "RSltrTJzGL2lnf6S"
         }
     ]
-    
+
 #### /gpio
 Gets a list of all GPIO states ... probably? (Can't test this yet!)
 
@@ -185,7 +186,7 @@ Gives a list of available sources on all routers in Pathfinder
         },
         ...
     ]
-    
+
 #### /source/:sourceId
 Gets a source with the provided source ID
 
@@ -199,7 +200,7 @@ Gets a source with the provided source ID
         "routerId": "1",
         "_id": "Klu1DydarqtHRLBm"
     }
-    
+
 #### /destinations
 Gets a list of all available destinations across all routers on the system
 
@@ -228,7 +229,7 @@ Gets a list of all available destinations across all routers on the system
         }
         ...
     ]
-    
+
 #### /destination/:destinationId
 Gets a specific destination by ID
 
@@ -280,7 +281,7 @@ Gets details about a route between :sourceId and :destinationId
         "routerId": "1",
         "_id": "KmVIV96jiA2Av3Fp"
     }
-    
+
 #### /route/source/:sourceId
 Gets a list of all the routes originating from :sourceId
 
@@ -305,7 +306,7 @@ Gets a list of all the routes originating from :sourceId
         }
         ...
     ]
-    
+
 #### /route/destination/:destinationId
 Gets the current route ending up at :destinationId
 
@@ -318,7 +319,7 @@ Gets the current route ending up at :destinationId
         "routerId": "1",
         "_id": "9RG7APbKC1XSVdDO"
     }
-    
+
 #### /memoryslots
 Gets a list of all the current (set) MemorySlots
 
@@ -338,7 +339,7 @@ Gets a list of all the current (set) MemorySlots
             "_id": "kI2DGgAw6Po9YD7T"
         }
     ]
-    
+
 #### /memoryslot/:slotName
 ##### GET
 Gets the information about memoryslot called :slotName
@@ -350,14 +351,14 @@ Gets the information about memoryslot called :slotName
         "value": "Doobery",
         "_id": "8gDDPnzgzSkbIK30"
     }
-	
+
 ##### POST
-If you POST to this path, you can now SET a memory slot using the msValue paramter. 
+If you POST to this path, you can now SET a memory slot using the msValue paramter.
 
 For example with cURL:
       curl --data "msValue=hello" http://localhost:8080/memorySlot/ONAIR
 
-It will return some JSON in the same format as you would with a GET, for confirmation. 
+It will return some JSON in the same format as you would with a GET, for confirmation.
 
 
 ### License
