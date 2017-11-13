@@ -10,7 +10,7 @@ var fs = require('fs'),
 	https = require('https')
 var express = require('express')
 var pkginfo = require('pkginfo')(module);
-
+var fs = require('fs');
 var bunyan = require('bunyan')
 var auth = require('http-auth')
 var PFInterface = require('pfint')
@@ -21,7 +21,13 @@ var config = require('./config')
 //console.log("PathfinderPC Interface");
 //console.log("Chris Roberts (@naxxfish)");
 //console.log("-----------------------------");
-// API methods coming right up
+
+// create the logging directory if it does not already exist
+var logsDir = './logs';
+
+if (!fs.existsSync(logsDir)){
+    fs.mkdirSync(logsDir);
+}
 var app = express()
 // use bunyan for logging
 app.use(require('express-bunyan-logger')({
@@ -30,14 +36,13 @@ app.use(require('express-bunyan-logger')({
 		{
 			level: 'error',
 			stream: process.stdout
-		}
-		,
+		},
 		{
-		level: 'trace',
-		type: 'rotating-file',
-		path: 'logs/requests.log',
-		period: '1d', // daily rotation
-		count: 7 // one week log
+			level: 'trace',
+			type: 'rotating-file',
+			path: logsDir + '/requests.log',
+			period: '1d', // daily rotation
+			count: 7 // one week log
 	}]
 }));
 
@@ -50,7 +55,7 @@ var log = bunyan.createLogger({
 		{
 			level: 'trace',
 			type: 'rotating-file',
-			path: 'logs/pfinterface.log',
+			path: logsDir + '/pfinterface.log',
 			period: '1d', // daily rotation
 			count: 7 // one week log
 		}
@@ -93,19 +98,22 @@ function stompConnect() {
 		})
 	});
 	connectionManager.on('connecting', function(connector) {
+		var address = connector.serverProperties.remoteAddress.transportPath;
 		log.info({
 			'component': 'stomp',
 			'event': 'connecting',
-			'connector': connector
+			'address': address
 		});
 	});
+
 	var channelPool = stompit.ChannelPool(connectionManager);
+
 	channelPool.channel(function(error, channel) {
 		if (error) {
 			log.error({
 				'component': 'stomp',
 				'event': 'error',
-				'error': error
+				'error': error.message
 			})
 			return
 		}
@@ -126,7 +134,7 @@ function stompConnect() {
 					log.error({
 						'component': 'stomp',
 						'event': 'error',
-						'error': error
+						'error': error.message
 					})
 				} else {
 					log.debug({
