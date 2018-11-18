@@ -5,12 +5,12 @@
     "email": "chris@naxxfish.eu",
     "url": "http://naxxfish.eu/"
   },
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "An interface to PathfinderPC exposing methods as a HTTP REST API.  Also can optionally send messages to a STOMP compatible Message Queue server",
   "dependencies": {
     "bunyan": "^1.8.12",
     "http-auth": "^2.2.8",
-    "pfint": "0.0.4",
+    "pfint": "0.0.7",
     "pkginfo": "^0.4.1",
     "restify": "^6.3.2",
     "restify-bunyan-logger": "^2.0.7",
